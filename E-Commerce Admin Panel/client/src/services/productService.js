@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/products/';
 
-// Helper function to get auth token from localStorage
+// Helper function to get auth token from localStoragecd
 const getConfig = (token) => ({
     headers: {
         Authorization: `Bearer ${token}`
