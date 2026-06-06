@@ -1,24 +1,25 @@
-import {React} from 'react'
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-
-// PrimeReact CSS
 import 'primereact/resources/themes/lara-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import 'primereact/resources/primereact.min.css'
 import 'primeflex/primeflex.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import LoginPage from './pages/LoginPage'
+import Dashboard from './pages/Dashboard'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
-
-
   return (
-    <>
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
-    </>
   )
 }
 

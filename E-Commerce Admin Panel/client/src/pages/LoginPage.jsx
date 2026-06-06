@@ -5,33 +5,68 @@ import * as yup from "yup";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
+import {
+  setLoading,
+  loginSuccess,
+  loginFail,
+  reset,
+} from "../redux/slices/authSlice";
 
 const schema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup.string().min(6, "Min 6 characters").required("Password is required"),
+  password: yup
+    .string()
+    .min(6, "Min 6 characters")
+    .required("Password is required"),
 });
 
 const LoginPage = () => {
   const canvasRef = useRef(null);
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isLoading, isError, message } = useSelector((state) => state.auth);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => console.log(data);
+  useEffect(() => {
+    return () => {
+      dispatch(reset());
+    };
+  }, [dispatch]);
+
+  const onSubmit = async (data) => {
+    try {
+      dispatch(setLoading());
+      const user = await authService.login(data);
+      dispatch(loginSuccess(user));
+      navigate("/");
+    } catch (error) {
+      dispatch(loginFail(error.response?.data?.message || "Login failed"));
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     let animId;
     let particles = [];
-
     const resize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
     };
     resize();
     window.addEventListener("resize", resize);
-
     for (let i = 0; i < 60; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -42,7 +77,6 @@ const LoginPage = () => {
         o: Math.random() * 0.5 + 0.1,
       });
     }
-
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
@@ -57,7 +91,10 @@ const LoginPage = () => {
       });
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dist = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+          const dist = Math.hypot(
+            particles[i].x - particles[j].x,
+            particles[i].y - particles[j].y,
+          );
           if (dist < 100) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
@@ -81,9 +118,7 @@ const LoginPage = () => {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Outfit:wght@300;400;500;600&display=swap');
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         .login-root {
           min-height: 100vh;
           background: #020817;
@@ -93,7 +128,6 @@ const LoginPage = () => {
           position: relative;
           overflow: hidden;
         }
-
         .login-canvas {
           position: absolute;
           inset: 0;
@@ -101,7 +135,6 @@ const LoginPage = () => {
           height: 100%;
           z-index: 0;
         }
-
         .orb {
           position: absolute;
           border-radius: 50%;
@@ -119,8 +152,6 @@ const LoginPage = () => {
           background: radial-gradient(circle, rgba(139,92,246,0.1), transparent 70%);
           bottom: -80px; right: 200px;
         }
-
-        /* Left Panel */
         .left-panel {
           flex: 1;
           display: flex;
@@ -130,7 +161,6 @@ const LoginPage = () => {
           position: relative;
           z-index: 1;
         }
-
         .brand-badge {
           display: inline-flex;
           align-items: center;
@@ -153,13 +183,7 @@ const LoginPage = () => {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.4; transform: scale(0.75); }
         }
-        .brand-text {
-          color: #38bdf8;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.5px;
-        }
-
+        .brand-text { color: #38bdf8; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; }
         .hero-title {
           font-family: 'Orbitron', monospace;
           font-size: clamp(32px, 3.5vw, 52px);
@@ -177,7 +201,6 @@ const LoginPage = () => {
           background-clip: text;
           display: block;
         }
-
         .hero-desc {
           color: rgba(255,255,255,0.45);
           font-size: 15px;
@@ -186,37 +209,12 @@ const LoginPage = () => {
           margin-bottom: 52px;
           font-weight: 300;
         }
-
-        .stats-row {
-          display: flex;
-          gap: 0;
-          align-items: center;
-        }
-        .stat-item {
-          padding: 0 28px 0 0;
-        }
+        .stats-row { display: flex; gap: 0; align-items: center; }
+        .stat-item { padding: 0 28px 0 0; }
         .stat-item:first-child { padding-left: 0; }
-        .stat-num {
-          font-family: 'Orbitron', monospace;
-          font-size: 30px;
-          font-weight: 700;
-          color: white;
-          line-height: 1;
-        }
-        .stat-label {
-          color: rgba(255,255,255,0.3);
-          font-size: 12px;
-          margin-top: 4px;
-          letter-spacing: 0.5px;
-        }
-        .stat-divider {
-          width: 1px;
-          height: 40px;
-          background: rgba(255,255,255,0.08);
-          margin-right: 28px;
-        }
-
-        /* Right Panel */
+        .stat-num { font-family: 'Orbitron', monospace; font-size: 30px; font-weight: 700; color: white; line-height: 1; }
+        .stat-label { color: rgba(255,255,255,0.3); font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; }
+        .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); margin-right: 28px; }
         .right-panel {
           width: 500px;
           min-height: 100vh;
@@ -228,8 +226,6 @@ const LoginPage = () => {
           z-index: 1;
           margin-right: 40px;
         }
-
-        /* Glowing border card */
         .form-card {
           width: 100%;
           background: rgba(255,255,255,0.03);
@@ -241,40 +237,25 @@ const LoginPage = () => {
           backdrop-filter: blur(20px);
           animation: fadeUp 0.7s ease both;
         }
-
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Animated blue line on left side of card */
         .form-card::before {
           content: '';
           position: absolute;
-          left: 0;
-          top: 0;
-          width: 3px;
-          height: 100%;
-          background: linear-gradient(
-            180deg,
-            transparent 0%,
-            #38bdf8 30%,
-            #6366f1 60%,
-            #38bdf8 80%,
-            transparent 100%
-          );
+          left: 0; top: 0;
+          width: 3px; height: 100%;
+          background: linear-gradient(180deg, transparent 0%, #38bdf8 30%, #6366f1 60%, #38bdf8 80%, transparent 100%);
           background-size: 100% 200%;
           animation: lineFlow 3s linear infinite;
           border-radius: 0 2px 2px 0;
           box-shadow: 0 0 12px rgba(56,189,248,0.6), 0 0 24px rgba(56,189,248,0.3);
         }
-
         @keyframes lineFlow {
           0% { background-position: 0 100%; }
           100% { background-position: 0 -100%; }
         }
-
-        /* Top glow line */
         .form-card::after {
           content: '';
           position: absolute;
@@ -283,7 +264,6 @@ const LoginPage = () => {
           background: linear-gradient(90deg, transparent, #38bdf8, #6366f1, transparent);
           opacity: 0.6;
         }
-
         .form-icon-wrap {
           width: 52px; height: 52px;
           background: linear-gradient(135deg, #0ea5e9, #6366f1);
@@ -294,47 +274,12 @@ const LoginPage = () => {
           margin-bottom: 22px;
           box-shadow: 0 8px 24px rgba(14,165,233,0.35);
         }
-
-        .form-title {
-          font-family: 'Orbitron', monospace;
-          font-size: 22px;
-          font-weight: 700;
-          color: white;
-          margin-bottom: 6px;
-          letter-spacing: 0.5px;
-        }
-        .form-subtitle {
-          color: rgba(255,255,255,0.35);
-          font-size: 13px;
-          margin-bottom: 32px;
-          font-weight: 300;
-        }
-
+        .form-title { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; color: white; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .form-subtitle { color: rgba(255,255,255,0.35); font-size: 13px; margin-bottom: 32px; font-weight: 300; }
         .field-group { margin-bottom: 20px; }
-
-        .field-label {
-          display: block;
-          color: rgba(255,255,255,0.4);
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 1.2px;
-          text-transform: uppercase;
-          margin-bottom: 8px;
-        }
-
+        .field-label { display: block; color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
         .input-wrap { position: relative; }
-        .input-icon {
-          position: absolute;
-          left: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: rgba(255,255,255,0.2);
-          font-size: 13px;
-          z-index: 2;
-          pointer-events: none;
-        }
-
-        /* Email input */
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-size: 13px; z-index: 2; pointer-events: none; }
         .custom-input {
           width: 100% !important;
           background: rgba(255,255,255,0.04) !important;
@@ -354,8 +299,6 @@ const LoginPage = () => {
           outline: none !important;
         }
         .custom-input::placeholder { color: rgba(255,255,255,0.18) !important; }
-
-        /* Password input — same size as email */
         .p-password { width: 100% !important; display: block !important; }
         .p-password-input {
           width: 100% !important;
@@ -377,32 +320,22 @@ const LoginPage = () => {
         }
         .p-password-input::placeholder { color: rgba(255,255,255,0.18) !important; }
         .p-password-toggle-mask-icon { color: rgba(255,255,255,0.25) !important; right: 14px !important; }
-
-        .field-error {
+        .field-error { color: #f87171; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+        .server-error {
+          background: rgba(248,113,113,0.1);
+          border: 1px solid rgba(248,113,113,0.3);
+          border-radius: 10px;
+          padding: 10px 14px;
           color: #f87171;
-          font-size: 12px;
-          margin-top: 6px;
+          font-size: 13px;
+          margin-bottom: 16px;
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 8px;
         }
-
-        .forgot-row {
-          display: flex;
-          justify-content: flex-end;
-          margin-top: -8px;
-          margin-bottom: 24px;
-        }
-        .forgot-link {
-          color: #38bdf8;
-          font-size: 12px;
-          cursor: pointer;
-          opacity: 0.7;
-          transition: opacity 0.2s;
-          font-weight: 500;
-        }
+        .forgot-row { display: flex; justify-content: flex-end; margin-top: -8px; margin-bottom: 24px; }
+        .forgot-link { color: #38bdf8; font-size: 12px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; font-weight: 500; }
         .forgot-link:hover { opacity: 1; }
-
         .login-btn {
           width: 100% !important;
           background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
@@ -418,28 +351,11 @@ const LoginPage = () => {
           cursor: pointer !important;
           height: 50px !important;
         }
-        .login-btn:hover {
-          transform: translateY(-2px) !important;
-          box-shadow: 0 14px 32px rgba(14,165,233,0.4) !important;
-        }
-
-        .form-footer {
-          margin-top: 28px;
-          padding-top: 20px;
-          border-top: 1px solid rgba(255,255,255,0.05);
-          text-align: center;
-          color: rgba(255,255,255,0.2);
-          font-size: 11px;
-          letter-spacing: 0.5px;
-        }
-
+        .login-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 14px 32px rgba(14,165,233,0.4) !important; }
+        .form-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.5px; }
         @media (max-width: 768px) {
           .left-panel { display: none; }
-          .right-panel {
-            width: 100%;
-            margin-right: 0;
-            padding: 24px;
-          }
+          .right-panel { width: 100%; margin-right: 0; padding: 24px; }
         }
       `}</style>
 
@@ -448,23 +364,19 @@ const LoginPage = () => {
         <div className="orb orb-1" />
         <div className="orb orb-2" />
 
-        {/* Left Panel */}
         <div className="left-panel">
           <div className="brand-badge">
             <div className="brand-dot" />
             <span className="brand-text">E-Commerce Platform</span>
           </div>
-
           <h1 className="hero-title">
             Manage your
             <span className="highlight">Business Smarter</span>
           </h1>
-
           <p className="hero-desc">
-            A powerful admin dashboard to track sales, manage products,
-            handle orders, and grow your business — all in one place.
+            A powerful admin dashboard to track sales, manage products, handle
+            orders, and grow your business — all in one place.
           </p>
-
           <div className="stats-row">
             <div className="stat-item">
               <div className="stat-num">2.4k+</div>
@@ -483,14 +395,24 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Right Panel */}
         <div className="right-panel">
-          <div className="form-card">
+         <div className="form-card" onKeyDown={(e) => e.key === 'Enter' && handleSubmit(onSubmit)()}>
             <div className="form-icon-wrap">
-              <i className="pi pi-shield" style={{ color: "white", fontSize: "22px" }} />
+              <i
+                className="pi pi-shield"
+                style={{ color: "white", fontSize: "22px" }}
+              />
             </div>
             <div className="form-title">WELCOME BACK</div>
             <div className="form-subtitle">Sign in to your admin account</div>
+
+            {/* Server Error */}
+            {isError && (
+              <div className="server-error">
+                <i className="pi pi-exclamation-triangle" />
+                {message}
+              </div>
+            )}
 
             {/* Email */}
             <div className="field-group">
@@ -505,7 +427,10 @@ const LoginPage = () => {
               </div>
               {errors.email && (
                 <div className="field-error">
-                  <i className="pi pi-exclamation-circle" style={{ fontSize: "11px" }} />
+                  <i
+                    className="pi pi-exclamation-circle"
+                    style={{ fontSize: "11px" }}
+                  />
                   {errors.email.message}
                 </div>
               )}
@@ -517,7 +442,8 @@ const LoginPage = () => {
               <div className="input-wrap">
                 <i className="pi pi-lock input-icon" />
                 <Password
-                  {...register("password")}
+                  value={watch("password") || ""}
+                  onChange={(e) => setValue("password", e.target.value)}
                   placeholder="Enter your password"
                   feedback={false}
                   toggleMask
@@ -526,7 +452,10 @@ const LoginPage = () => {
               </div>
               {errors.password && (
                 <div className="field-error">
-                  <i className="pi pi-exclamation-circle" style={{ fontSize: "11px" }} />
+                  <i
+                    className="pi pi-exclamation-circle"
+                    style={{ fontSize: "11px" }}
+                  />
                   {errors.password.message}
                 </div>
               )}
@@ -537,11 +466,12 @@ const LoginPage = () => {
             </div>
 
             <Button
-              label="Sign In"
-              icon="pi pi-arrow-right"
+              label={isLoading ? "Signing In..." : "Sign In"}
+              icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-arrow-right"}
               iconPos="right"
               onClick={handleSubmit(onSubmit)}
               className="login-btn"
+              disabled={isLoading}
             />
 
             <div className="form-footer">
