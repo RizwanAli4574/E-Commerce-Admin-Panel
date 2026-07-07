@@ -67,16 +67,16 @@ const LoginPage = () => {
     };
     resize();
     window.addEventListener("resize", resize);
-    for (let i = 0; i < 60; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 1.5 + 0.5,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-        o: Math.random() * 0.5 + 0.1,
-      });
-    }
+  for (let i = 0; i < 120; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 0.8,
+    dx: (Math.random() - 0.5) * 0.4,
+    dy: (Math.random() - 0.5) * 0.4,
+    o: Math.random() * 0.8 + 0.3,
+  });
+}
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
@@ -95,12 +95,12 @@ const LoginPage = () => {
             particles[i].x - particles[j].x,
             particles[i].y - particles[j].y,
           );
-          if (dist < 100) {
+          if (dist < 150) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(99,179,237,${0.15 * (1 - dist / 100)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(99,179,237,${0.4 * (1 - dist / 100)})`;
+            ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
@@ -121,7 +121,7 @@ const LoginPage = () => {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         .login-root {
           min-height: 100vh;
-          background: #020817;
+          background: #0d1f3c;
           display: flex;
           align-items: center;
           font-family: 'Outfit', sans-serif;
@@ -144,7 +144,7 @@ const LoginPage = () => {
         }
         .orb-1 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, rgba(56,189,248,0.12), transparent 70%);
+          background: radial-gradient(circle, rgba(56,189,248,0.25), transparent 70%);
           top: -100px; left: -100px;
         }
         .orb-2 {
@@ -202,7 +202,7 @@ const LoginPage = () => {
           display: block;
         }
         .hero-desc {
-          color: rgba(255,255,255,0.45);
+          color: rgba(255,255,255,0.95);
           font-size: 15px;
           line-height: 1.8;
           max-width: 420px;
@@ -213,7 +213,7 @@ const LoginPage = () => {
         .stat-item { padding: 0 28px 0 0; }
         .stat-item:first-child { padding-left: 0; }
         .stat-num { font-family: 'Orbitron', monospace; font-size: 30px; font-weight: 700; color: white; line-height: 1; }
-        .stat-label { color: rgba(255,255,255,0.3); font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; }
+        .stat-label { color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; }
         .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); margin-right: 28px; }
         .right-panel {
           width: 500px;
@@ -275,11 +275,11 @@ const LoginPage = () => {
           box-shadow: 0 8px 24px rgba(14,165,233,0.35);
         }
         .form-title { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; color: white; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .form-subtitle { color: rgba(255,255,255,0.35); font-size: 13px; margin-bottom: 32px; font-weight: 300; }
+        .form-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 32px; font-weight: 300; }
         .field-group { margin-bottom: 20px; }
-        .field-label { display: block; color: rgba(255,255,255,0.4); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+        .field-label { display: block; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
         .input-wrap { position: relative; }
-        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-size: 13px; z-index: 2; pointer-events: none; }
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.8); font-size: 13px; z-index: 2; pointer-events: none; }
         .custom-input {
           width: 100% !important;
           background: rgba(255,255,255,0.04) !important;
@@ -298,7 +298,7 @@ const LoginPage = () => {
           box-shadow: 0 0 0 3px rgba(56,189,248,0.08), 0 0 16px rgba(56,189,248,0.1) !important;
           outline: none !important;
         }
-        .custom-input::placeholder { color: rgba(255,255,255,0.18) !important; }
+        .custom-input::placeholder { color: rgba(255,255,255,0.5) !important; }
         .p-password { width: 100% !important; display: block !important; }
         .p-password-input {
           width: 100% !important;
@@ -318,7 +318,7 @@ const LoginPage = () => {
           box-shadow: 0 0 0 3px rgba(56,189,248,0.08), 0 0 16px rgba(56,189,248,0.1) !important;
           outline: none !important;
         }
-        .p-password-input::placeholder { color: rgba(255,255,255,0.18) !important; }
+        .p-password-input::placeholder { color: rgba(255,255,255,0.5) !important; }
         .p-password-toggle-mask-icon { color: rgba(255,255,255,0.25) !important; right: 14px !important; }
         .field-error { color: #f87171; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
         .server-error {
@@ -334,7 +334,7 @@ const LoginPage = () => {
           gap: 8px;
         }
         .forgot-row { display: flex; justify-content: flex-end; margin-top: -8px; margin-bottom: 24px; }
-        .forgot-link { color: #38bdf8; font-size: 12px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; font-weight: 500; }
+        .forgot-link { color: #38bdf8; font-size: 12px; cursor: pointer; opacity: 0.9; transition: opacity 0.2s; font-weight: 500; }
         .forgot-link:hover { opacity: 1; }
         .login-btn {
           width: 100% !important;
@@ -352,7 +352,7 @@ const LoginPage = () => {
           height: 50px !important;
         }
         .login-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 14px 32px rgba(14,165,233,0.4) !important; }
-        .form-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.5px; }
+        .form-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.47); text-align: center; color: rgba(255,255,255,0.8); font-size: 11px; letter-spacing: 0.5px; }
         @media (max-width: 768px) {
           .left-panel { display: none; }
           .right-panel { width: 100%; margin-right: 0; padding: 24px; }
@@ -404,7 +404,7 @@ const LoginPage = () => {
               />
             </div>
             <div className="form-title">WELCOME BACK</div>
-            <div className="form-subtitle">Sign in to your admin account</div>
+            <div className="form-subtitle">Sign in to your account</div>
 
             {/* Server Error */}
             {isError && (
