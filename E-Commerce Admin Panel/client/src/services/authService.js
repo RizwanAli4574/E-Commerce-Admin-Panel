@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/auth/";
+const API_URL = "https://fictional-meme-7v9979vp95j73xxjp-5000.app.github.dev/api/auth/";
 
 // Register new user
 const register = async (userData) => {
