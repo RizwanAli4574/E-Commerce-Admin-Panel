@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "./apiConfig";
 
-const API_URL = "https://fictional-meme-7v9979vp95j73xxjp-5000.app.github.dev/api/auth/";
+const API_URL = `${API_BASE_URL}/api/auth/`;
 
 // Register new user
 const register = async (userData) => {

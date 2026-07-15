@@ -1,24 +1,15 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
+import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const Dashboard = () => {
-  return (
-    <div style={{ 
-  display: 'flex', 
-  background: '#020817', 
-  minHeight: '100vh',
-  overflow: 'hidden'
-}}>
-      <Sidebar />
-      <div style={{ marginLeft: '240px', flex: 1 }}>
-        <Navbar />
-        <div style={{ marginTop: '64px', padding: '28px', color: 'white' }}>
-          <h2>Dashboard</h2>
-        </div>
-      </div>
-    </div>
-  );
+const ProtectedRoute = ({ children }) => {
+  const { user } = useSelector((state) => state.auth);
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
 };
 
-export default Dashboard;
+export default ProtectedRoute;
