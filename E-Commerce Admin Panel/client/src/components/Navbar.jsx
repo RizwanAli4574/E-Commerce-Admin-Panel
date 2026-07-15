@@ -8,6 +8,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  console.log("REDUX USER DATA:", user);
 
   const handleLogout = () => {
     authService.logout();
@@ -101,7 +102,7 @@ const Navbar = () => {
 
         <div className="navbar-right">
           <div className="navbar-avatar">
-            {user?.name?.charAt(0).toUpperCase()}
+           {user?.name ? user.name.charAt(0).toUpperCase() : (user?.username ? user.username.charAt(0).toUpperCase() : "U")}
           </div>
 
           <button className="logout-btn" onClick={handleLogout}>

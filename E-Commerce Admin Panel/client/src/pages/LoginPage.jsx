@@ -67,16 +67,16 @@ const LoginPage = () => {
     };
     resize();
     window.addEventListener("resize", resize);
-  for (let i = 0; i < 120; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2 + 0.8,
-    dx: (Math.random() - 0.5) * 0.4,
-    dy: (Math.random() - 0.5) * 0.4,
-    o: Math.random() * 0.8 + 0.3,
-  });
-}
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 2 + 0.8,
+        dx: (Math.random() - 0.5) * 0.4,
+        dy: (Math.random() - 0.5) * 0.4,
+        o: Math.random() * 0.8 + 0.3,
+      });
+    }
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       particles.forEach((p) => {
@@ -396,7 +396,10 @@ const LoginPage = () => {
         </div>
 
         <div className="right-panel">
-         <div className="form-card" onKeyDown={(e) => e.key === 'Enter' && handleSubmit(onSubmit)()}>
+          <div
+            className="form-card"
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit(onSubmit)()}
+          >
             <div className="form-icon-wrap">
               <i
                 className="pi pi-shield"
@@ -442,8 +445,13 @@ const LoginPage = () => {
               <div className="input-wrap">
                 <i className="pi pi-lock input-icon" />
                 <Password
+                  {...register("password")} // Yeh line add karna zaroori hai
                   value={watch("password") || ""}
-                  onChange={(e) => setValue("password", e.target.value)}
+                  onChange={(e) =>
+                    setValue("password", e.target.value, {
+                      shouldValidate: true,
+                    })
+                  }
                   placeholder="Enter your password"
                   feedback={false}
                   toggleMask
