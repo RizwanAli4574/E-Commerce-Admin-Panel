@@ -24,9 +24,9 @@ export const protect = async (req, res, next) => {
     };
 
     export const adminOnly = (req , res, next) => {
-        if (req.user && req.user.role === 'admin'){
+        if (req.user && (req.user.role === 'admin' || req.user.role === 'seller')){
             next();
         } else {
-            res.status(403).json({message: 'Admin access only'});
+            res.status(403).json({message: 'Seller or Admin access only'});
         }
     }

@@ -1,7 +1,9 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Sidebar = () => {
+  const { user } = useSelector((state) => state.auth);
   const menuItems = [
     { label: 'Dashboard', icon: 'pi pi-home', path: '/' },
     { label: 'Products', icon: 'pi pi-box', path: '/products' },
@@ -74,7 +76,7 @@ const Sidebar = () => {
           <div className="logo-icon">
             <i className="pi pi-shield" style={{ color: 'white', fontSize: '16px' }} />
           </div>
-          <span className="logo-text">ADMIN</span>
+          <span className="logo-text" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>{user?.name || 'User'}</span>
         </div>
 
         {menuItems.map((item) => (

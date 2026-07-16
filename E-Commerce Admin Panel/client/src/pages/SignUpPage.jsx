@@ -5,8 +5,9 @@ import * as yup from "yup";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import authService from "../services/authService";
 import {
   setLoading,
@@ -16,20 +17,29 @@ import {
 } from "../redux/slices/authSlice";
 
 const schema = yup.object({
+  name: yup.string().required("Full Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
     .string()
     .min(6, "Min 6 characters")
     .required("Password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password'), null], 'Passwords must match')
+    .required('Confirm password is required'),
+  role: yup.string().oneOf(['seller', 'buyer'], 'Invalid role').required('Role is required'),
 });
 
-const LoginPage = () => {
+const SignUpPage = () => {
   const canvasRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const successMsg = location.state?.message;
   const { isLoading, isError, message } = useSelector((state) => state.auth);
+
+  const roleOptions = [
+    { label: 'Seller', value: 'seller' },
+    { label: 'Buyer', value: 'buyer' }
+  ];
 
   const {
     register,
@@ -39,6 +49,9 @@ const LoginPage = () => {
     watch,
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      role: 'seller'
+    }
   });
 
   useEffect(() => {
@@ -50,11 +63,17 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     try {
       dispatch(setLoading());
-      const user = await authService.login(data);
-      dispatch(loginSuccess(user));
-      navigate("/");
+      // Call register service
+      await authService.register({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: data.role
+      });
+      dispatch(reset());
+      navigate("/login", { state: { message: "Registration successful! Please sign in." } });
     } catch (error) {
-      dispatch(loginFail(error.response?.data?.message || "Login failed"));
+      dispatch(loginFail(error.response?.data?.message || "Registration failed"));
     }
   };
 
@@ -121,7 +140,7 @@ const LoginPage = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Outfit:wght@300;400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        .login-root {
+        .signup-root {
           min-height: 100vh;
           background: #0d1f3c;
           display: flex;
@@ -130,7 +149,7 @@ const LoginPage = () => {
           position: relative;
           overflow: hidden;
         }
-        .login-canvas {
+        .signup-canvas {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -218,12 +237,12 @@ const LoginPage = () => {
         .stat-label { color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 4px; letter-spacing: 0.5px; }
         .stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); margin-right: 28px; }
         .right-panel {
-          width: 500px;
+          width: 550px;
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 48px 48px 48px 40px;
+          padding: 40px 48px;
           position: relative;
           z-index: 1;
           margin-right: 40px;
@@ -232,7 +251,7 @@ const LoginPage = () => {
           width: 100%;
           background: rgba(255,255,255,0.03);
           border-radius: 24px;
-          padding: 40px;
+          padding: 36px;
           position: relative;
           overflow: hidden;
           border: 1px solid rgba(255,255,255,0.06);
@@ -273,13 +292,13 @@ const LoginPage = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 22px;
+          margin-bottom: 20px;
           box-shadow: 0 8px 24px rgba(14,165,233,0.35);
         }
         .form-title { font-family: 'Orbitron', monospace; font-size: 22px; font-weight: 700; color: white; margin-bottom: 6px; letter-spacing: 0.5px; }
-        .form-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 32px; font-weight: 300; }
-        .field-group { margin-bottom: 20px; }
-        .field-label { display: block; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; }
+        .form-subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 24px; font-weight: 300; }
+        .field-group { margin-bottom: 16px; }
+        .field-label { display: block; color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
         .input-wrap { position: relative; }
         .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.8); font-size: 13px; z-index: 2; pointer-events: none; }
         .custom-input {
@@ -289,10 +308,10 @@ const LoginPage = () => {
           border-radius: 12px !important;
           color: white !important;
           font-size: 14px !important;
-          padding: 13px 16px 13px 40px !important;
+          padding: 11px 16px 11px 40px !important;
           transition: all 0.25s !important;
           font-family: 'Outfit', sans-serif !important;
-          height: 48px !important;
+          height: 44px !important;
         }
         .custom-input:focus {
           border-color: rgba(56,189,248,0.5) !important;
@@ -300,7 +319,48 @@ const LoginPage = () => {
           box-shadow: 0 0 0 3px rgba(56,189,248,0.08), 0 0 16px rgba(56,189,248,0.1) !important;
           outline: none !important;
         }
-        .custom-input::placeholder { color: rgba(255,255,255,0.5) !important; }
+        .custom-dropdown {
+          width: 100% !important;
+          background: rgba(255,255,255,0.04) !important;
+          border: 1px solid rgba(255,255,255,0.08) !important;
+          border-radius: 12px !important;
+          transition: all 0.25s !important;
+          font-family: 'Outfit', sans-serif !important;
+          height: 44px !important;
+        }
+        .custom-dropdown .p-dropdown-label {
+          color: white !important;
+          font-size: 14px !important;
+          padding: 11px 16px 11px 40px !important;
+          line-height: normal !important;
+        }
+        .custom-dropdown:focus, .custom-dropdown.p-focus {
+          border-color: rgba(56,189,248,0.5) !important;
+          background: rgba(56,189,248,0.05) !important;
+          box-shadow: 0 0 0 3px rgba(56,189,248,0.08) !important;
+        }
+        .custom-dropdown .p-dropdown-trigger {
+          color: rgba(255,255,255,0.6) !important;
+        }
+        .p-dropdown-panel {
+          background: #0d1f3c !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
+          border-radius: 12px !important;
+        }
+        .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+          color: white !important;
+          font-size: 14px !important;
+          font-family: 'Outfit', sans-serif !important;
+          padding: 10px 16px !important;
+          transition: background 0.2s !important;
+        }
+        .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+          background: rgba(56,189,248,0.15) !important;
+          color: #38bdf8 !important;
+        }
+        .p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+          background: rgba(255,255,255,0.05) !important;
+        }
         .p-password { width: 100% !important; display: block !important; }
         .p-password-input {
           width: 100% !important;
@@ -309,10 +369,10 @@ const LoginPage = () => {
           border-radius: 12px !important;
           color: white !important;
           font-size: 14px !important;
-          padding: 13px 44px 13px 40px !important;
+          padding: 11px 44px 11px 40px !important;
           transition: all 0.25s !important;
           font-family: 'Outfit', sans-serif !important;
-          height: 48px !important;
+          height: 44px !important;
         }
         .p-password-input:focus {
           border-color: rgba(56,189,248,0.5) !important;
@@ -320,14 +380,13 @@ const LoginPage = () => {
           box-shadow: 0 0 0 3px rgba(56,189,248,0.08), 0 0 16px rgba(56,189,248,0.1) !important;
           outline: none !important;
         }
-        .p-password-input::placeholder { color: rgba(255,255,255,0.5) !important; }
         .p-password-toggle-mask-icon { color: rgba(255,255,255,0.25) !important; right: 14px !important; }
-        .field-error { color: #f87171; font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 5px; }
+        .field-error { color: #f87171; font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 5px; }
         .server-error {
           background: rgba(248,113,113,0.1);
           border: 1px solid rgba(248,113,113,0.3);
           border-radius: 10px;
-          padding: 10px 14px;
+          padding: 8px 12px;
           color: #f87171;
           font-size: 13px;
           margin-bottom: 16px;
@@ -335,15 +394,12 @@ const LoginPage = () => {
           align-items: center;
           gap: 8px;
         }
-        .forgot-row { display: flex; justify-content: flex-end; margin-top: -8px; margin-bottom: 24px; }
-        .forgot-link { color: #38bdf8; font-size: 12px; cursor: pointer; opacity: 0.9; transition: opacity 0.2s; font-weight: 500; }
-        .forgot-link:hover { opacity: 1; }
-        .login-btn {
+        .signup-btn {
           width: 100% !important;
           background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
           border: none !important;
           border-radius: 12px !important;
-          padding: 14px !important;
+          padding: 12px !important;
           font-size: 14px !important;
           font-weight: 600 !important;
           font-family: 'Outfit', sans-serif !important;
@@ -351,18 +407,20 @@ const LoginPage = () => {
           box-shadow: 0 8px 24px rgba(14,165,233,0.3) !important;
           transition: all 0.3s !important;
           cursor: pointer !important;
-          height: 50px !important;
+          height: 46px !important;
         }
-        .login-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 14px 32px rgba(14,165,233,0.4) !important; }
-        .form-footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.47); text-align: center; color: rgba(255,255,255,0.8); font-size: 11px; letter-spacing: 0.5px; }
-        @media (max-width: 768px) {
+        .signup-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 14px 32px rgba(14,165,233,0.4) !important; }
+        .form-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center; color: rgba(255,255,255,0.8); font-size: 13px; }
+        .form-footer a { color: #38bdf8; text-decoration: none; font-weight: 500; margin-left: 5px; }
+        .form-footer a:hover { text-decoration: underline; }
+        @media (max-width: 992px) {
           .left-panel { display: none; }
           .right-panel { width: 100%; margin-right: 0; padding: 24px; }
         }
       `}</style>
 
-      <div className="login-root">
-        <canvas ref={canvasRef} className="login-canvas" />
+      <div className="signup-root">
+        <canvas ref={canvasRef} className="signup-canvas" />
         <div className="orb orb-1" />
         <div className="orb orb-2" />
 
@@ -372,12 +430,11 @@ const LoginPage = () => {
             <span className="brand-text">E-Commerce Platform</span>
           </div>
           <h1 className="hero-title">
-            Manage your
-            <span className="highlight">Business Smarter</span>
+            Join the
+            <span className="highlight">E-Commerce Panel</span>
           </h1>
           <p className="hero-desc">
-            A powerful admin dashboard to track sales, manage products, handle
-            orders, and grow your business — all in one place.
+            Register your administrator profile to access the dashboard and manage sales, products, and order data in real time.
           </p>
           <div className="stats-row">
             <div className="stat-item">
@@ -404,12 +461,12 @@ const LoginPage = () => {
           >
             <div className="form-icon-wrap">
               <i
-                className="pi pi-shield"
+                className="pi pi-user-plus"
                 style={{ color: "white", fontSize: "22px" }}
               />
             </div>
-            <div className="form-title">WELCOME BACK</div>
-            <div className="form-subtitle">Sign in to your account</div>
+            <div className="form-title">CREATE ACCOUNT</div>
+            <div className="form-subtitle">Register your details below</div>
 
             {/* Server Error */}
             {isError && (
@@ -419,26 +476,29 @@ const LoginPage = () => {
               </div>
             )}
 
-            {/* Success Message */}
-            {successMsg && (
-              <div style={{
-                background: 'rgba(34,197,94,0.1)',
-                border: '1px solid rgba(34,197,94,0.3)',
-                borderRadius: '10px',
-                padding: '10px 14px',
-                color: '#4ade80',
-                fontSize: '13px',
-                marginBottom: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}>
-                <i className="pi pi-check-circle" />
-                {successMsg}
+            {/* Full Name */}
+            <div className="field-group">
+              <label className="field-label">Full Name</label>
+              <div className="input-wrap">
+                <i className="pi pi-user input-icon" />
+                <InputText
+                  {...register("name")}
+                  placeholder="John Doe"
+                  className="custom-input"
+                />
               </div>
-            )}
+              {errors.name && (
+                <div className="field-error">
+                  <i
+                    className="pi pi-exclamation-circle"
+                    style={{ fontSize: "11px" }}
+                  />
+                  {errors.name.message}
+                </div>
+              )}
+            </div>
 
-            {/* Email */}
+            {/* Email Address */}
             <div className="field-group">
               <label className="field-label">Email Address</label>
               <div className="input-wrap">
@@ -460,20 +520,44 @@ const LoginPage = () => {
               )}
             </div>
 
+            {/* Role Dropdown */}
+            <div className="field-group">
+              <label className="field-label">Select Role</label>
+              <div className="input-wrap">
+                <i className="pi pi-briefcase input-icon" />
+                <Dropdown
+                  value={watch("role")}
+                  options={roleOptions}
+                  onChange={(e) => setValue("role", e.value, { shouldValidate: true })}
+                  placeholder="Select Role"
+                  className="custom-dropdown"
+                />
+              </div>
+              {errors.role && (
+                <div className="field-error">
+                  <i
+                    className="pi pi-exclamation-circle"
+                    style={{ fontSize: "11px" }}
+                  />
+                  {errors.role.message}
+                </div>
+              )}
+            </div>
+
             {/* Password */}
             <div className="field-group">
               <label className="field-label">Password</label>
               <div className="input-wrap">
                 <i className="pi pi-lock input-icon" />
                 <Password
-                  {...register("password")} // Yeh line add karna zaroori hai
+                  {...register("password")}
                   value={watch("password") || ""}
                   onChange={(e) =>
                     setValue("password", e.target.value, {
                       shouldValidate: true,
                     })
                   }
-                  placeholder="Enter your password"
+                  placeholder="Minimum 6 characters"
                   feedback={false}
                   toggleMask
                   inputClassName="p-password-input"
@@ -490,21 +574,48 @@ const LoginPage = () => {
               )}
             </div>
 
-            <div className="forgot-row">
-              <span className="forgot-link">Forgot password?</span>
+            {/* Confirm Password */}
+            <div className="field-group">
+              <label className="field-label">Confirm Password</label>
+              <div className="input-wrap">
+                <i className="pi pi-lock input-icon" />
+                <Password
+                  {...register("confirmPassword")}
+                  value={watch("confirmPassword") || ""}
+                  onChange={(e) =>
+                    setValue("confirmPassword", e.target.value, {
+                      shouldValidate: true,
+                    })
+                  }
+                  placeholder="Confirm your password"
+                  feedback={false}
+                  toggleMask
+                  inputClassName="p-password-input"
+                />
+              </div>
+              {errors.confirmPassword && (
+                <div className="field-error">
+                  <i
+                    className="pi pi-exclamation-circle"
+                    style={{ fontSize: "11px" }}
+                  />
+                  {errors.confirmPassword.message}
+                </div>
+              )}
             </div>
 
             <Button
-              label={isLoading ? "Signing In..." : "Sign In"}
-              icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-arrow-right"}
+              label={isLoading ? "Registering..." : "Sign Up"}
+              icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-user-plus"}
               iconPos="right"
               onClick={handleSubmit(onSubmit)}
-              className="login-btn"
+              className="signup-btn"
               disabled={isLoading}
             />
 
             <div className="form-footer">
-              Don't have an account? <Link to="/register" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 500, marginLeft: '5px' }}>Sign Up</Link>
+              Already have an account? 
+              <Link to="/login">Sign In</Link>
             </div>
           </div>
         </div>
@@ -513,4 +624,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignUpPage;

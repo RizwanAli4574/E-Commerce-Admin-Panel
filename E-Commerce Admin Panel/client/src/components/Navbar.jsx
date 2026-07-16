@@ -102,7 +102,7 @@ const Navbar = () => {
 
         <div className="navbar-right">
           <div className="navbar-avatar">
-           {user?.name ? user.name.charAt(0).toUpperCase() : (user?.username ? user.username.charAt(0).toUpperCase() : "U")}
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
 
           <button className="logout-btn" onClick={handleLogout}>
